@@ -89,7 +89,9 @@ def main():
 
     text = "Привет, я бот и я в этом канале!"
 
-    bot.send_message(chat_id=chat_id, text=text)
+    # bot.send_message(chat_id=chat_id, text=text)
+    bot.send_photo(chat_id=chat_id, photo=open(
+        "images/spacex_1.jpg", "rb"))
 
     # about_bot = bot.get_me()
     # print(about_bot)
