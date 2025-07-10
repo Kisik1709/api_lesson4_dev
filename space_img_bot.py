@@ -1,11 +1,12 @@
-import os
-import time
-import random
-import logging
-import argparse
-import telegram
-from dotenv import load_dotenv
 from utils import create_folder, setup_logger
+from dotenv import load_dotenv
+import telegram
+import argparse
+import logging
+import random
+import time
+import os
+<< << << < HEAD
 
 
 def creat_parser():
@@ -24,11 +25,17 @@ def get_img_folder(image_dir):
     return all_images
 
 
+== == == =
+
+
 def main():
     load_dotenv()
-    setup_logger()
-    token = os.getenv("TELEGRAM_BOT_API")
-    if not token:
+
+
+<< << << < HEAD
+ setup_logger()
+  token = os.getenv("TELEGRAM_BOT_API")
+   if not token:
         print("Нет ключа Telegram")
         return
 
@@ -75,6 +82,17 @@ def main():
         except telegram.error.TelegramError:
             logging.exception("Ошибка отправки")
         time.sleep(post_delay)
+== == == =
+ token = os.getenv("TELEGRAM_BOT_API")
+  chat_id = "@thebestspaceimg"
+   bot = telegram.Bot(token=token)
+
+    text = "Привет, я бот и я в этом канале!"
+
+    bot.send_message(chat_id=chat_id, text=text)
+
+    # about_bot = bot.get_me()
+    # print(about_bot)
 
 
 if __name__ == "__main__":
