@@ -1,7 +1,8 @@
 import os
+import logging
 import requests
 from dotenv import load_dotenv
-from utils import create_folder, load_img, get_next_img_number
+from utils import create_folder, load_img, existing_number
 
 
 def get_links_nasa_epic(token):
@@ -12,27 +13,31 @@ def get_links_nasa_epic(token):
 
     response = requests.get(url, params=params)
     response.raise_for_status()
-    response_data = response.json()
+    epic_images = response.json()
 
     links = []
-    for item in response_data[:5]:
-        date = item["date"].split()[0].replace("-", "/")
-        image = item["image"]
-        img_url = f"https://api.nasa.gov/EPIC/archive/natural/{date}/png/{image}.png?api_key={token}"
+    for image in epic_images[:5]:
+        date = image["date"].split()[0].replace("-", "/")
+        image_id = image["image"]
+        img_url = f"https://api.nasa.gov/EPIC/archive/natural/{date}/png/{image_id}.png"
         links.append(img_url)
-    return links
+    return links, params
+
+
+def get_download_settings(token):
+    links, params = get_links_nasa_epic(token)
+    img_filepath = create_folder()
+    prefix = "nasa_epic"
+    number = existing_number(img_filepath, prefix)
+    return links, params, img_filepath, prefix, number
 
 
 def fetch_nasa_epic(token):
-    links = get_links_nasa_epic(token)
-    folder_path_img = create_folder()
-    prefix = "nasa_epic"
-    next_number = get_next_img_number(prefix, folder_path_img)
+    links, params, img_filepath, prefix, number = get_download_settings(token)
 
-    for link in links:
-        filename = f"{prefix}{next_number}.png"
-        load_img(link, filename, folder_path_img)
-        next_number += 1
+    for i, link in enumerate(links, start=number or 1):
+        filename = f"{prefix}{i}.png"
+        load_img(link, filename, img_filepath, params)
 
 
 def main():
@@ -41,10 +46,11 @@ def main():
     if not token_nasa:
         print("Ошибка API ключа для сайта NASA")
         return
+    logger = logging.getLogger(__name__)
     try:
         fetch_nasa_epic(token_nasa)
-    except requests.exceptions.RequestException as e:
-        print(f"Ошибка загрузки: {e}")
+    except requests.exceptions.RequestException:
+        logger.exception("Ошибка загрузки изображений")
 
 
 if __name__ == "__main__":

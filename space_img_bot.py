@@ -1,6 +1,7 @@
 import os
 import time
 import random
+import logging
 import argparse
 import telegram
 from dotenv import load_dotenv
@@ -8,7 +9,8 @@ from utils import create_folder
 
 
 def creat_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Скрипт для автоматической загрузки изображений в телеграм канал")
     parser.add_argument("post_delay", nargs="?", type=int, default=14400,
                         help="Отсрочка таймера отправки изображений")
     return parser
@@ -65,12 +67,12 @@ def main():
                 random_mode = True
 
         i = current_list_img.pop(0)
-
+        logging.getLogger(__name__)
         try:
             with open(os.path.join(image_dir, i), "rb") as file:
                 bot.send_photo(chat_id=chat_id, photo=file)
-        except Exception as e:
-            print(f"Ошибка отправки: {e}")
+        except Exception:
+            logging.exception("Ошибка отправки")
         time.sleep(post_delay)
 
 

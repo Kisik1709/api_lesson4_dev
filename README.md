@@ -100,7 +100,7 @@ python space_img_bot.py 3600  # отправка каждые 60 минут
 - requests — HTTP-запросы
 - python-dotenv — чтение .env-файла
 - python-telegram-bot==13.15 — работа с Telegram Bot API
-- os, time, argparse, random, json — встроенные модули Python
+- os, time, argparse, random, logging — встроенные модули Python
 
 ## 🔗 Используемые API
 
