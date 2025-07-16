@@ -2,7 +2,7 @@ import os
 import logging
 import requests
 from dotenv import load_dotenv
-from utils import create_folder, load_img, extract_file_extension, existing_number
+from utils import create_folder, load_img, extract_file_extension, existing_number, setup_logger
 
 
 def get_links_nasa_apod(token):
@@ -28,39 +28,35 @@ def get_links_nasa_apod(token):
     return links
 
 
-def get_download_settings(token):
-    links = get_links_nasa_apod(token)
+def fetch_nasa_apod(links, filepath, prefix, number):
+    for num, link in enumerate(links, start=number or 1):
+        ext = extract_file_extension(link)
+        if not ext:
+            ext = ".jpg"
+        filename = f"{prefix}{num}{ext}"
+        load_img(link, filename, filepath)
+
+
+def main():
+    load_dotenv()
+    setup_logger()
+    token_nasa = os.getenv("API_KEY_NASA")
+    if not token_nasa:
+        print("Ошибка API ключа для сайта NASA")
+        return
+
+    links = get_links_nasa_apod(token_nasa)
     if not links:
         print("Нет доступных изображений")
         return
     img_filepath = create_folder()
     prefix = "nasa_apod"
     number = existing_number(img_filepath, prefix)
-    return links, img_filepath, prefix, number
 
-
-def fetch_nasa_apod(token):
-    links, img_filepath, prefix, number = get_download_settings(token)
-
-    for i, link in enumerate(links, start=number or 1):
-        ext = extract_file_extension(link)
-        if not ext:
-            ext = ".jpg"
-        filename = f"{prefix}{i}{ext}"
-        load_img(link, filename, img_filepath)
-
-
-def main():
-    load_dotenv()
-    token_nasa = os.getenv("API_KEY_NASA")
-    if not token_nasa:
-        print("Ошибка API ключа для сайта NASA")
-        return
-    logger = logging.getLogger(__name__)
     try:
-        fetch_nasa_apod(token_nasa)
+        fetch_nasa_apod(links, img_filepath, prefix, number)
     except requests.exceptions.RequestException:
-        logger.exception("Ошибка загрузки изображений")
+        logging.exception("Ошибка загрузки изображений")
 
 
 if __name__ == "__main__":

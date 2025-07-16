@@ -1,7 +1,7 @@
 import logging
 import requests
 import argparse
-from utils import create_folder, load_img, extract_file_extension, existing_number
+from utils import create_folder, load_img, extract_file_extension, existing_number, setup_logger
 
 
 def create_parser():
@@ -34,38 +34,34 @@ def get_links_spacex(launch_id):
     return []
 
 
-def get_download_settings(launch_id):
+def download_spacex_images(links, filepath, prefix, number):
+    for num, link in enumerate(links, start=number or 1):
+        ext = extract_file_extension(link)
+        if not ext:
+            ext = ".jpg"
+        filename = f"{prefix}{num}{ext}"
+        load_img(link, filename, filepath)
+
+
+def main():
+    setup_logger()
+    parser = create_parser()
+    namespace = parser.parse_args()
+    launch_id = namespace.launch_id
+
     links = get_links_spacex(launch_id)
     if not links:
         print("Изображения не найдены")
         return
+
     img_filepath = create_folder()
     prefix = "spacex_"
     number = existing_number(img_filepath, prefix)
-    return links, img_filepath, prefix, number
 
-
-def download_spacex_images(launch_id):
-
-    links, img_filepath, prefix, number = get_download_settings(launch_id)
-
-    for i, link in enumerate(links, start=number or 1):
-        ext = extract_file_extension(link)
-        if not ext:
-            ext = ".jpg"
-        filename = f"{prefix}{i}{ext}"
-        load_img(link, filename, img_filepath)
-
-
-def main():
-    parser = create_parser()
-    namespace = parser.parse_args()
-    launch_id = namespace.launch_id
-    logger = logging.getLogger(__name__)
     try:
-        download_spacex_images(launch_id)
+        download_spacex_images(links, img_filepath, prefix, number)
     except requests.exceptions.RequestException:
-        logger.exception("Ошибка загрузки изображений")
+        logging.exception("Ошибка загрузки изображений")
 
 
 if __name__ == "__main__":

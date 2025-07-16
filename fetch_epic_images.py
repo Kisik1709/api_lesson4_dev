@@ -2,7 +2,7 @@ import os
 import logging
 import requests
 from dotenv import load_dotenv
-from utils import create_folder, load_img, existing_number
+from utils import create_folder, load_img, existing_number, setup_logger
 
 
 def get_links_nasa_epic(token):
@@ -24,33 +24,29 @@ def get_links_nasa_epic(token):
     return links, params
 
 
-def get_download_settings(token):
-    links, params = get_links_nasa_epic(token)
-    img_filepath = create_folder()
-    prefix = "nasa_epic"
-    number = existing_number(img_filepath, prefix)
-    return links, params, img_filepath, prefix, number
-
-
-def fetch_nasa_epic(token):
-    links, params, img_filepath, prefix, number = get_download_settings(token)
-
-    for i, link in enumerate(links, start=number or 1):
-        filename = f"{prefix}{i}.png"
-        load_img(link, filename, img_filepath, params)
+def fetch_nasa_epic(links, params, filepath, prefix, number):
+    for num, link in enumerate(links, start=number or 1):
+        filename = f"{prefix}{num}.png"
+        load_img(link, filename, filepath, params)
 
 
 def main():
     load_dotenv()
+    setup_logger()
     token_nasa = os.getenv("API_KEY_NASA")
     if not token_nasa:
         print("Ошибка API ключа для сайта NASA")
         return
-    logger = logging.getLogger(__name__)
+
+    links, params = get_links_nasa_epic(token_nasa)
+    img_filepath = create_folder()
+    prefix = "nasa_epic"
+    number = existing_number(img_filepath, prefix)
+
     try:
-        fetch_nasa_epic(token_nasa)
+        fetch_nasa_epic(links, params, img_filepath, prefix, number)
     except requests.exceptions.RequestException:
-        logger.exception("Ошибка загрузки изображений")
+        logging.exception("Ошибка загрузки изображений")
 
 
 if __name__ == "__main__":

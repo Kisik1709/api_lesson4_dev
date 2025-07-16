@@ -1,6 +1,11 @@
 import os
+import logging
 import requests
 from urllib.parse import urlparse
+
+
+def setup_logger():
+    logging.basicConfig(level=logging.INFO, filename="app.log", filemode="a")
 
 
 def create_folder():

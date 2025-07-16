@@ -5,7 +5,7 @@ import logging
 import argparse
 import telegram
 from dotenv import load_dotenv
-from utils import create_folder
+from utils import create_folder, setup_logger
 
 
 def creat_parser():
@@ -26,6 +26,7 @@ def get_img_folder(image_dir):
 
 def main():
     load_dotenv()
+    setup_logger()
     token = os.getenv("TELEGRAM_BOT_API")
     if not token:
         print("Нет ключа Telegram")
@@ -44,12 +45,12 @@ def main():
     random_mode = False
 
     all_images = get_img_folder(image_dir)
-    current_list_img = all_images.copy()
+    current_images = all_images.copy()
 
     bot = telegram.Bot(token=token)
 
     while True:
-        if not current_list_img:
+        if not current_images:
             fresh_list = get_img_folder(image_dir)
 
             if not fresh_list:
@@ -60,18 +61,18 @@ def main():
             new_img = list(set(fresh_list) - set(all_images))
             all_images.extend(new_img)
 
-            current_list_img = all_images.copy()
+            current_images = all_images.copy()
             if random_mode:
-                random.shuffle(current_list_img)
+                random.shuffle(current_images)
             else:
                 random_mode = True
 
-        i = current_list_img.pop(0)
-        logging.getLogger(__name__)
+        image = current_images.pop(0)
+
         try:
-            with open(os.path.join(image_dir, i), "rb") as file:
+            with open(os.path.join(image_dir, image), "rb") as file:
                 bot.send_photo(chat_id=chat_id, photo=file)
-        except Exception:
+        except telegram.error.TelegramError:
             logging.exception("Ошибка отправки")
         time.sleep(post_delay)
 
