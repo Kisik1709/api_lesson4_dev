@@ -11,7 +11,7 @@ from utils import create_folder, setup_logger
 def creat_parser():
     parser = argparse.ArgumentParser(
         description="Скрипт для автоматической загрузки изображений в телеграм канал")
-    parser.add_argument("post_delay", nargs="?", type=int, default=20,
+    parser.add_argument("post_delay", nargs="?", type=int, default=14400,
                         help="Отсрочка таймера отправки изображений")
     return parser
 
