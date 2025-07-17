@@ -1,12 +1,14 @@
-from utils import create_folder, setup_logger
-from dotenv import load_dotenv
-import telegram
-import argparse
-import logging
-import random
-import time
 import os
+import time
+import random
+import logging
+import argparse
+import telegram
+from dotenv import load_dotenv
+from utils import create_folder, setup_logger
 << << << < HEAD
+<< << << < HEAD
+== == == =
 
 
 def creat_parser():
@@ -17,7 +19,15 @@ def creat_parser():
     return parser
 
 
+<< << << < HEAD
 def get_img_folder(image_dir):
+
+
+== == == =
+
+
+def get_images_from_dir(image_dir):
+
     all_images = [f for f in os.listdir(image_dir) if f.lower().endswith((
         ".jpg", ".png", ".jpeg", ".gif"))]
     if not all_images:
@@ -25,6 +35,10 @@ def get_img_folder(image_dir):
     return all_images
 
 
+<< << << < HEAD
+
+
+== == == =
 == == == =
 
 
@@ -33,9 +47,17 @@ def main():
 
 
 << << << < HEAD
+
+
+<< << << < HEAD
  setup_logger()
   token = os.getenv("TELEGRAM_BOT_API")
    if not token:
+== == == =
+    setup_logger()
+    token = os.getenv("TELEGRAM_BOT_API")
+    if not token:
+
         print("Нет ключа Telegram")
         return
 
@@ -51,13 +73,18 @@ def main():
     image_dir = create_folder()
     random_mode = False
 
+<< << << < HEAD
     all_images = get_img_folder(image_dir)
+== == == =
+    all_images = get_images_from_dir(image_dir)
+
     current_images = all_images.copy()
 
     bot = telegram.Bot(token=token)
 
     while True:
         if not current_images:
+<< << << < HEAD
             fresh_list = get_img_folder(image_dir)
 
             if not fresh_list:
@@ -88,13 +115,32 @@ def main():
    bot = telegram.Bot(token=token)
 
     text = "Привет, я бот и я в этом канале!"
+=======
+            fresh_images = get_images_from_dir(image_dir)
 
-    # bot.send_message(chat_id=chat_id, text=text)
-    bot.send_photo(chat_id=chat_id, photo=open(
-        "images/spacex_1.jpg", "rb"))
 
-    # about_bot = bot.get_me()
-    # print(about_bot)
+            if not fresh_images:
+                print("В папке нет изображений")
+                time.sleep(30)
+                continue
+
+            fresh_images_to_add = list(set(fresh_images) - set(all_images))
+            all_images.extend(fresh_images_to_add)
+
+            current_images = all_images.copy()
+            if random_mode:
+                random.shuffle(current_images)
+            else:
+                random_mode = True
+
+        image = current_images.pop(0)
+
+        try:
+            with open(os.path.join(image_dir, image), "rb") as file:
+                bot.send_photo(chat_id=chat_id, photo=file)
+        except telegram.error.TelegramError:
+            logging.exception(f"Ошибка отправки: {image}")
+        time.sleep(post_delay)
 
 
 if __name__ == "__main__":

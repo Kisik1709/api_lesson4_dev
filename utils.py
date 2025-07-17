@@ -5,6 +5,9 @@ import os
 << << << < HEAD
 == == == =
 
+<< << << < HEAD
+== == == =
+
 
 << << << < HEAD
 
@@ -27,22 +30,37 @@ def load_img(url, filename, dir_path, params=None):
 == == == =
 
 
+def setup_logger():
+    logging.basicConfig(level=logging.INFO, filename="app.log", filemode="a")
+
+
 def create_folder():
     base_dir = os.path.dirname(__file__)
-    folder_name_img = "images"
-    folder_path_img = os.path.join(base_dir, folder_name_img)
-    if not os.path.exists(folder_path_img):
-        os.makedirs(folder_path_img)
-    return folder_path_img
+    img_filename = "images"
+    img_filepath = os.path.join(base_dir, img_filename)
+    os.makedirs(img_filepath, exist_ok=True)
+    return img_filepath
 
 
+<< << << < HEAD
 def load_img(url, filename, dir_path):
 
-    full_path = os.path.join(dir_path, filename)
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
 
+== == == =
+def load_img(url, filename, dir_path, params=None):
+
+
+>>>>>> > 155da4c(Refactor bot to: - Use argparse for publishing delay with fallback - Check required .env variables - Refresh image list when new files appear - Switch to random order after first cycle - Handle missing or empty image directory)
+full_path = os.path.join(dir_path, filename)
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
+
+<< << << < HEAD
+== == == =
+response = requests.get(url, params=params, headers=headers)
+response.raise_for_status()
+>>>>>> > 155da4c(Refactor bot to: - Use argparse for publishing delay with fallback - Check required .env variables - Refresh image list when new files appear - Switch to random order after first cycle - Handle missing or empty image directory)
 
 << << << < HEAD
 response = requests.get(url, params=params, headers=headers)
@@ -62,12 +80,20 @@ def extract_file_extension(img_link):
 == == == =
 
 
+<< << << < HEAD
 def check_file_extension(img_link):
 
-    _, ext = os.path.splitext(urlparse(img_link).path)
-    return ext
+
+== == == =
+def extract_file_extension(img_link):
 
 
+>>>>>> > 155da4c(Refactor bot to: - Use argparse for publishing delay with fallback - Check required .env variables - Refresh image list when new files appear - Switch to random order after first cycle - Handle missing or empty image directory)
+_, ext = os.path.splitext(urlparse(img_link).path)
+return ext
+
+
+<< << << < HEAD
 << << << < HEAD
 
 
@@ -87,3 +113,13 @@ def get_next_img_number(prefix, folder_path_img):
 
     next_number = max(exist_num, default=0) + 1
     return next_number
+
+
+== == == =
+
+
+def count_next_file_index(filepath, prefix):
+    return sum(1 for f in os.listdir(filepath) if f.startswith(prefix)) + 1
+
+
+>>>>>> > 155da4c(Refactor bot to: - Use argparse for publishing delay with fallback - Check required .env variables - Refresh image list when new files appear - Switch to random order after first cycle - Handle missing or empty image directory)
